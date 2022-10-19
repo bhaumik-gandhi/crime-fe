@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { groupBy } from 'lodash';
 
 import { getCrimeListApi } from './api';
-import { AccordionComponent, TableComponent } from './components';
+import { AccordionComponent, SelectComponent, TableComponent } from './components';
 import { CrimeHeaders, CrimeType } from './types';
 
 const CrimePage = () => {
   const [crimes, setCrimes] = useState<CrimeType[]>([])
   const [groupBySuburb, setGroupBySuburb]: any = useState([])
+  const [selectedGroupByOption, setSelectedGroupByOption] = useState(CrimeHeaders[1])
 
   const getCrimeList = async () => {
     try {
@@ -20,7 +21,7 @@ const CrimePage = () => {
   }
 
   const getCrimesBySubrub = () => {
-    return groupBy(crimes, 'Suburb - Incident')
+    return groupBy(crimes, selectedGroupByOption)
   }
 
   useEffect(() => {
@@ -28,19 +29,34 @@ const CrimePage = () => {
   }, [])
 
   useEffect(() => {
-    if (crimes.length) {
+    if (crimes.length && selectedGroupByOption) {
       setGroupBySuburb(getCrimesBySubrub())
     }
-  }, [crimes.length])
+  }, [crimes.length, selectedGroupByOption])
 
-  return <>{(Object.keys(groupBySuburb)).map((key, index) => {
-    return <AccordionComponent key={index} eventKey={index.toString()} header={key}>
-      <TableComponent
-        rows={groupBySuburb[key]}
-        headers={CrimeHeaders}
-      />
-    </AccordionComponent>
-  })}
+  return <>
+    <div style={{
+      display: 'flex',
+      margin: '5px 0px',
+      justifyContent: 'flex-end',
+    }}>
+      <label style={{ marginRight: 5, display: 'flex', alignItems: 'center' }}>Group By: </label>
+      <div style={{ display: 'flex', width: '30%', justifyContent: 'flex-end', }}>
+        <SelectComponent
+          options={CrimeHeaders}
+          onChange={(element) => setSelectedGroupByOption(element.target.value)}
+          value={selectedGroupByOption}
+        />
+      </div>
+    </div>
+    {(Object.keys(groupBySuburb)).map((key, index) => {
+      return <AccordionComponent key={index} eventKey={index.toString()} header={key}>
+        <TableComponent
+          rows={groupBySuburb[key]}
+          headers={CrimeHeaders}
+        />
+      </AccordionComponent>
+    })}
   </>
 }
 
