@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   return (
-    <Container>
+    <Container data-testid='app-container'>
       <CrimePage />
     </Container>
   );

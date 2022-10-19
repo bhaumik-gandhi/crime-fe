@@ -9,13 +9,17 @@ const CrimePage = () => {
   const [crimes, setCrimes] = useState<CrimeType[]>([])
   const [groupBySuburb, setGroupBySuburb]: any = useState([])
   const [selectedGroupByOption, setSelectedGroupByOption] = useState(CrimeHeaders[1])
+  const [loading, setLoading] = useState(true)
 
   const getCrimeList = async () => {
     try {
+      setLoading(true)
       const apiRes = await getCrimeListApi()
       const crimesData = await apiRes.json()
       setCrimes(crimesData)
+      setLoading(false)
     } catch (err) {
+      setLoading(false)
       console.error(err)
     }
   }
@@ -46,11 +50,18 @@ const CrimePage = () => {
           options={CrimeHeaders}
           onChange={(element) => setSelectedGroupByOption(element.target.value)}
           value={selectedGroupByOption}
+          dataTestId='group-by'
         />
       </div>
     </div>
-    {(Object.keys(groupBySuburb)).map((key, index) => {
-      return <AccordionComponent key={index} eventKey={index.toString()} header={key}>
+    {loading && <div data-testid='loading-crime-data'>Loading...</div>}
+    {!loading && (Object.keys(groupBySuburb)).map((key, index) => {
+      return <AccordionComponent
+        key={index}
+        eventKey={index.toString()}
+        header={key}
+        dataTestId='crime-group-list'
+      >
         <TableComponent
           rows={groupBySuburb[key]}
           headers={CrimeHeaders}
