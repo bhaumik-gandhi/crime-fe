@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { getCrimeListApi } from './api';
+import { groupBy } from 'lodash';
 
-type CrimeType = {
-  _id: number
-  'Reported Date': string
-  'Suburb - Incident': string
-  'Postcode - Incident': number,
-  'Offence Level 1 Description': string,
-  'Offence Level 2 Description': string,
-  'Offence Level 3 Description': string,
-  'Offence count': number
-}
+import { getCrimeListApi } from './api';
+import { AccordionComponent, TableComponent } from './components';
+import { CrimeHeaders, CrimeType } from './types';
 
 const CrimePage = () => {
   const [crimes, setCrimes] = useState<CrimeType[]>([])
+  const [groupBySuburb, setGroupBySuburb]: any = useState([])
 
   const getCrimeList = async () => {
     try {
@@ -25,11 +19,29 @@ const CrimePage = () => {
     }
   }
 
+  const getCrimesBySubrub = () => {
+    return groupBy(crimes, 'Suburb - Incident')
+  }
+
   useEffect(() => {
     getCrimeList()
   }, [])
 
-  return <div>Crime</div>
+  useEffect(() => {
+    if (crimes.length) {
+      setGroupBySuburb(getCrimesBySubrub())
+    }
+  }, [crimes.length])
+
+  return <>{(Object.keys(groupBySuburb)).map((key, index) => {
+    return <AccordionComponent key={index} eventKey={index.toString()} header={key}>
+      <TableComponent
+        rows={groupBySuburb[key]}
+        headers={CrimeHeaders}
+      />
+    </AccordionComponent>
+  })}
+  </>
 }
 
 export default CrimePage;
